@@ -1,37 +1,24 @@
-version: '3.7'
-
 services:
-  database:
-    container_name: database
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: symfony_docker_new
-      MYSQL_USER: symfony
-      MYSQL_PASSWORD: symfony
+  web:
+    image: nginx:latest
     ports:
-      - '4306:3306'
+      - "8080:80"
     volumes:
-      - ./mysql:/var/lib/mysql
-  php:
-    container_name: php
-    build:
-      context: ./php
-    ports:
-      - '9000:9000'
-    volumes:
-      - ./app:/var/www/symfony_docker
-    depends_on:
-      - database
-  nginx:
-    container_name: nginx
-    image: nginx:stable-alpine
-    ports:
-      - '8080:80'
-    volumes:
-      - ./app:/var/www/symfony_docker
-      - ./nginx/defoult.conf:/etc/nginx/conf.d/defoult.conf
-    depends_on:
+      - ./code:/code
+      - ./hosts:/etc/nginx/conf.d
+    links:
       - php
-      - database
+  php:
+    build: .
+    volumes:
+      - ./code:/code
+    depends_on:
+      - db
+    links:
+      - db
+  db:
+    image: mysql:8.0
+    ports:
+      - "6603:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: helloworld
